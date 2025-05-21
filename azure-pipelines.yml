@@ -59,7 +59,7 @@ stages:
          scriptType: bash
          scriptLocation: inlineScript
          inlineScript: |
-             az container create --resource-group rg-for-cicd-project --name devcontainer630131 --image registry31.azurecr.io/nginx:$(Build.BuildId) --dns-name-label devapp31 --cpu 1 --memory 1 --registry-login-server registry31.azurecr.io --registry-username registry31 --registry-password $(ACR_PASSWORD) --ports 80
+             az container create --resource-group rg-for-cicd-project --name devcontainer630131 --image registry31.azurecr.io/nginx:$(Build.BuildId) --dns-name-label devapp31 --cpu 1 --memory 1 --registry-login-server registry31.azurecr.io --registry-username registry31 --registry-password $(ACR_PASSWORD) --ports 80 --os-type Linux
 
 - stage: QA
   displayName: QA
@@ -74,6 +74,6 @@ stages:
          scriptType: bash
          scriptLocation: inlineScript
          inlineScript: |
-             az container create --resource-group rg-for-cicd-project --name qacontainer630131 --image registry31.azurecr.io/nginx:$(Build.BuildId) --dns-name-label qaapp31 --cpu 1 --memory 1 --registry-login-server registry31.azurecr.io --registry-username registry31 --registry-password $(ACR_PASSWORD) --ports 80
+             az container create --resource-group rg-for-cicd-project --name qacontainer630131 --image registry31.azurecr.io/nginx:$(Build.BuildId) --dns-name-label qaapp31 --cpu 1 --memory 1 --registry-login-server registry31.azurecr.io --registry-username registry31 --registry-password $(ACR_PASSWORD) --ports 80 --os-type Linux
 
 
