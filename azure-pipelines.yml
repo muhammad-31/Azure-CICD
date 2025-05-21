@@ -1,0 +1,79 @@
+trigger:
+- main
+
+resources:
+- repo: self
+
+variables:
+
+- name: dockerRegistryServiceConnection
+  value: '79a96ed2-021b-4a11-a110-33484406fc20'
+
+- name: imageRepository
+  value: 'nginx'
+
+- name: containerRegistry
+  value: 'registry31.azurecr.io'
+
+- name: dockerfilePath
+  value: '$(Build.SourcesDirectory)/Dockerfile'
+
+- name: tag
+  value: '$(Build.BuildId)'
+
+- name: vmImageName
+  value: 'ubuntu-latest'
+
+- group: acr-secrets  # This brings in secret variables
+
+
+stages:
+- stage: Build
+  displayName: Build and push stage
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+
+- stage: Dev
+  displayName: Dev
+  jobs:
+  - job: Dev
+    displayName: Dev
+    steps:
+     - task: AzureCLI@2
+       displayName: 'Azure CLI'
+       inputs:
+         azureSubscription: 'my-service-connection'
+         scriptType: bash
+         scriptLocation: inlineScript
+         inlineScript: |
+             az container create --resource-group rg-for-cicd-project --name devcontainer630131 --image registry31.azurecr.io/nginx:$(Build.BuildId) --dns-name-label devapp31 --cpu 1 --memory 1 --registry-login-server registry31.azurecr.io --registry-username registry31 --registry-password $(ACR_PASSWORD) --ports 80
+
+- stage: QA
+  displayName: QA
+  jobs:
+  - job: QA
+    displayName: QA
+    steps:
+     - task: AzureCLI@2
+       displayName: 'Azure CLI'
+       inputs:
+         azureSubscription: 'my-service-connection'
+         scriptType: bash
+         scriptLocation: inlineScript
+         inlineScript: |
+             az container create --resource-group rg-for-cicd-project --name qacontainer630131 --image registry31.azurecr.io/nginx:$(Build.BuildId) --dns-name-label qaapp31 --cpu 1 --memory 1 --registry-login-server registry31.azurecr.io --registry-username registry31 --registry-password $(ACR_PASSWORD) --ports 80
+
+
